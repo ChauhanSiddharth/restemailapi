@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Inbox</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<style>
+	.mail.active{
+		color:blue;
+	}
+	.mail{
+		cursor: pointer;
+	}
+</style>
+	<script>
+		$( document ).ready(function() {
+
+				var mails;
+				$.ajax('/emails', { dataType: 'json',
+				 async:false,
+				 success: function (data,status,xhr) { console.log(data);
+				 	mails = data;
+				 		
+				  },
+				  error: function (jqXhr, textStatus, errorMessage) { } 
+				});
+				function inbox(){
+					var html = `<ul>`;
+				 	mails.forEach(function (a) { 
+				 		if(!a.message_delete && !a.message_sent && !a.message_archive){
+				 			html += `<li>`+ a.receiver_email +`</li>`; 
+				 		}
+				 		
+				 	});
+				 	html += `</ul>`;
+				 	$("#inbox").html("").html(html);
+			};
+
+
+			inbox();
+
+			function sentMail(){
+					var html = `<ul>`;
+				 	mails.forEach(function (a) { 
+				 		if(!a.message_delete && a.message_sent && !a.message_archive){
+				 			html += `<li>`+ a.receiver_email +`</li>`; 
+				 		}
+				 		
+				 	});
+				 	html += `</ul>`;
+				 	$("#inbox").html("").html(html);
+			};
+
+			function archive(){
+					var html = `<ul>`;
+				 	mails.forEach(function (a) { 
+				 		if(!a.message_delete && !a.message_sent && a.message_archive){
+				 			html += `<li>`+ a.receiver_email +`</li>`; 
+				 		}
+				 		
+				 	});
+				 	html += `</ul>`;
+				 	$("#inbox").html("").html(html);
+			};
+
+			function trash(){
+					var html = `<ul>`;
+				 	mails.forEach(function (a) { 
+				 		if(a.message_delete && !a.message_sent && !a.message_archive){
+				 			html += `<li>`+ a.receiver_email +`</li>`; 
+				 		}
+				 		
+				 	});
+				 	html += `</ul>`;
+				 	$("#inbox").html("").html(html);
+			};
+				
+			$(document).on("click",".mail",function(){
+				$(document).find(".mail").removeClass("active");
+				if($(this).attr("data-content")=="inbox"){
+					inbox();
+				}
+				if($(this).attr("data-content")=="sentMail"){
+					sentMail();
+				}
+				if($(this).attr("data-content")=="archives"){
+					archive();
+				}
+				if($(this).attr("data-content")=="deleted"){
+					trash();
+				}
+				$(this).addClass("active");
+			})
+				
+			$(document).on("click",".compose_message",function(){
+				var modal = `<div class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Compose</h5>
+      </div>
+      <div class="modal-body">
+      <form action="/emails/" method="post">
+      <div class="form-group">
+		    <label>Name</label>
+		    <input type="text" class="form-control" id="name" name="receiver_name">
+		  </div>
+		  <div class="form-group">
+		    <label>Email</label>
+		    <input type="email" class="form-control" id="email" name="receiver_email">
+		  </div>
+         <div class="form-group">
+		    <label>Subject</label>
+		    <input type="text" class="form-control" id="subject" name="subject">
+		  </div>
+		  <div class="form-group">
+		    <label>Message</label>
+		    <textarea  class="form-control" id="message_drescription" name="message"></textarea>
+		  </div>
+		  <input type="hidden" name="sender_email" value="sid@gmail.com"/>
+
+      </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="send_mail">Send</button>
+        <button type="button" class="btn btn-secondary" id="cancel_mail">Close</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+$("body").append(modal);
+$(document).find(".modal").modal("show");
+			});
+		});
+
+$(document).on('click','#send_mail',function(){
+	alert("hi");
+	$(this).parents('.modal-content').find('form').submit();
+});
+$(document).on('click','#cancel_mail',function(){
+$(document).find(".modal").modal("hide");
+$(document).find(".modal").remove();
+});
+		
+	</script>
+</head>
+
+<body>
+	<button class="compose_message">Compose</button>
+	<h2><span class="mail inmail active" data-content="inbox">Inbox</span> <span class="mail sent" data-content="sentMail">Sent Mails</span> <span class="mail archive" data-content="archives">Archive</span> <span class="mail trash" data-content="deleted">Trash</span></h2>
+	<div id="inbox">
+		<p></p>
+	</div>
+
+</body>
+
+</html>
