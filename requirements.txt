@@ -1,6 +1,6 @@
 Django==2.1.5
 djangorestframework==3.9.2
-Jinja2==2.10.3
+Jinja2==2.11.3
 mysql-connector-python==8.0.17
 mysqlclient==1.4.4
 Pillow==5.4.1
